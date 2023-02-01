@@ -1,7 +1,7 @@
 import random
 
 number = random.randrange(100)
-for i in range(4):
+for i in range(3):
     try:
         user = int(input('guess: '))
     except ValueError:
@@ -14,5 +14,4 @@ for i in range(4):
         print ('greater')
     else:
         print ('lesser')
-
 print ('it was: %d' % number)
