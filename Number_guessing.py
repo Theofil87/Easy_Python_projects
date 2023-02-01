@@ -14,4 +14,5 @@ for i in range(4):
         print ('greater')
     else:
         print ('lesser')
+
 print ('it was: %d' % number)
