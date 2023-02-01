@@ -12,6 +12,8 @@ def szamol():
         eredmeny = szam1 * szam2
     elif operator == "/":
         eredmeny = szam1 / szam2
+    elif operator =="**":
+        eredmeny = szam1 ** szam2
     else:
         eredmeny = "Érvénytelen művelet"
     e4.delete(0, END)
