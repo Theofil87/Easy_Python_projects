@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Blokk — Tetris</title>
+<style>
+:root{color-scheme:dark;--bg:#09090b;--fg:#f4f4f5;--muted:#a1a1aa;--border:#27272a}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+body{display:grid;place-items:center;min-height:100dvh;overflow:hidden}
+.app{width:min(760px,100vw);padding:16px;display:grid;gap:12px}
+header,.stats{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-weight:800;letter-spacing:.22em}.stats{justify-content:space-around;color:var(--muted);font-size:12px}.stats b{display:block;color:var(--fg);font-size:20px}
+.main{display:grid;grid-template-columns:90px minmax(260px,360px) 90px;justify-content:center;gap:14px}
+.panel{display:grid;align-content:start;gap:8px;color:var(--muted);font-size:12px}.panel canvas{width:72px;height:72px;border:1px solid var(--border);border-radius:8px}
+#board{display:block;width:100%;max-height:72vh;aspect-ratio:1/2;background:#111;border:1px solid var(--border);border-radius:10px}
+button{border:1px solid var(--border);background:#18181b;color:var(--fg);border-radius:8px;padding:10px 14px;font-weight:600}
+.overlay{position:fixed;inset:0;display:grid;place-items:center;background:#0008}.card{width:min(340px,calc(100vw - 32px));padding:24px;border:1px solid var(--border);border-radius:16px;background:#121214;text-align:center;box-shadow:0 24px 60px #0008}.card h1{margin:0 0 8px}.card p{color:var(--muted)}.actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:420px;margin:auto}.controls button{padding:14px 4px;touch-action:manipulation}
+@media(max-width:620px){.main{grid-template-columns:1fr;justify-items:center}.panel{display:none}.app{padding:10px}#board{max-height:62vh}.controls{width:100%}}
+</style></head>
+<body>
+<div class="app">
+<header><div class="logo">BLOKK</div><button id="pause">Pause</button></header>
+<div class="stats"><span>SCORE<b id="score">0</b></span><span>LEVEL<b id="level">1</b></span><span>LINES<b id="lines">0</b></span><span>BEST<b id="best">0</b></span></div>
+<div class="main"><aside class="panel">HOLD<canvas id="hold" width="72" height="72"></canvas></aside><canvas id="board" width="300" height="600"></canvas><aside class="panel">NEXT<canvas id="next" width="72" height="72"></canvas></aside></div>
+<div class="controls"><button data-a="left">←</button><button data-a="rotate">↻</button><button data-a="down">↓</button><button data-a="drop">DROP</button><button data-a="right">→</button></div>
+</div>
+<div class="overlay" id="overlay"><div class="card"><h1>BLOKK</h1><p id="msg">Classic Tetris. Clear lines and beat your high score.</p><div class="actions"><button id="start">Start game</button></div></div></div>
+<script>
+const W=10,H=20,ctx=board.getContext('2d'),COLORS=['#d8dee8','#9aa4b2','#7b8798','#b8c1cc','#657184','#c7ced8','#8f9baa'];
+const SHAPES=[
+[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]
+];
+let grid,cur,next,holdPiece=null,holdUsed=false,score=0,lines=0,level=1,running=false,paused=false,last=0,dropTimer=0,best=+localStorage.blokkBest||0;
+bestEl=best;document.getElementById('best').textContent=best;
+function newPiece(){let i=Math.floor(Math.random()*7);return {shape:SHAPES[i].map(r=>r.slice()),x:3,y:0,c:i};}
+function reset(){grid=Array.from({length:H},()=>Array(W).fill(-1));cur=newPiece();next=newPiece();holdPiece=null;holdUsed=false;score=lines=0;level=1;update();}
+function rotate(s){return s[0].map((_,i)=>s.map(r=>r[i]).reverse())}
+function collide(p){for(let y=0;y<p.shape.length;y++)for(let x=0;x<p.shape[y].length;x++)if(p.shape[y][x]){let X=p.x+x,Y=p.y+y;if(X<0||X>=W||Y>=H||(Y>=0&&grid[Y][X]>=0))return true}return false}
+function move(dx,dy){let p={...cur,x:cur.x+dx,y:cur.y+dy};if(!collide(p)){cur=p;return true}return false}
+function rot(){let s=rotate(cur.shape),p={...cur,shape:s};for(const k of [0,-1,1,-2,2]){p.x=cur.x+k;if(!collide(p)){cur=p;return true}}return false}
+function lock(){cur.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v&&cur.y+y>=0)grid[cur.y+y][cur.x+x]=cur.c}));clear();cur=next;next=newPiece();holdUsed=false;if(collide(cur)){running=false;paused=false;msg.textContent='Game over — score '+score.toLocaleString();overlay.style.display='grid'}}
+function clear(){let n=0;grid=grid.filter(r=>{if(r.every(v=>v>=0)){n++;return false}return true});while(grid.length<H)grid.unshift(Array(W).fill(-1));if(n){lines+=n;score += [0,100,300,500,800][n]*level;level=1+Math.floor(lines/10)}}
+function hardDrop(){let d=0;while(move(0,1))d++;score+=d*2;lock();update()}
+function hold(){if(holdUsed)return;let saved=holdPiece;holdPiece={shape:cur.shape.map(r=>r.slice()),c:cur.c};cur=saved?{shape:saved.shape.map(r=>r.slice()),c:saved.c,x:3,y:0}:newPiece();holdUsed=true;update()}
+function update(){scoreEl.textContent=score.toLocaleString();levelEl.textContent=level;linesEl.textContent=lines;bestEl=Math.max(best,score);document.getElementById('best').textContent=bestEl.toLocaleString();draw();mini(hold,holdPiece);mini(next,next)}
+const scoreEl=document.getElementById('score'),levelEl=document.getElementById('level'),linesEl=document.getElementById('lines'),overlay=document.getElementById('overlay'),msg=document.getElementById('msg');
+function draw(){ctx.clearRect(0,0,300,600);ctx.fillStyle='#0f1012';ctx.fillRect(0,0,300,600);let cw=30;grid?.forEach((r,y)=>r.forEach((v,x)=>{if(v>=0)cell(ctx,x*cw,y*cw,cw,COLORS[v])}));if(cur)cur.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(ctx,(cur.x+x)*cw,(cur.y+y)*cw,cw,COLORS[cur.c])}))}
+function cell(c,x,y,s,col){c.fillStyle=col;c.fillRect(x+1,y+1,s-2,s-2)}
+function mini(c,p){let q=c.getContext('2d');q.clearRect(0,0,72,72);if(!p)return;q.fillStyle='#111';q.fillRect(0,0,72,72);let s=16,ox=(72-p.shape[0].length*s)/2,oy=(72-p.shape.length*s)/2;p.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(q,ox+x*s,oy+y*s,s,COLORS[p.c])}))}
+function loop(t){if(running&&!paused){let dt=t-last;dropTimer+=dt;let interval=Math.max(90,700-(level-1)*55);if(dropTimer>interval){dropTimer=0;if(!move(0,1))lock();update()}}last=t;requestAnimationFrame(loop)}
+function start(){reset();running=true;paused=false;overlay.style.display='none';requestAnimationFrame(loop)}
+function togglePause(){if(!running)return;paused=!paused;msg.textContent=paused?'Game paused':'Classic Tetris. Clear lines and beat your high score.';overlay.style.display=paused?'grid':'none'}
+document.getElementById('start').onclick=start;document.getElementById('pause').onclick=togglePause;
+document.addEventListener('keydown',e=>{if(!running&&!['Enter',' '].includes(e.key))return;if(['ArrowLeft','a','A'].includes(e.key))move(-1,0);else if(['ArrowRight','d','D'].includes(e.key))move(1,0);else if(['ArrowDown','s','S'].includes(e.key))move(0,1);else if(['ArrowUp','w','W'].includes(e.key))rot();else if(e.key===' ')hardDrop();else if(e.key==='c'||e.key==='C')hold();else if(e.key==='p'||e.key==='P')togglePause();update()});
+document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{let a=b.dataset.a;if(a==='left')move(-1,0);if(a==='right')move(1,0);if(a==='down')move(0,1);if(a==='rotate')rot();if(a==='drop')hardDrop();update()});
+reset();requestAnimationFrame(loop);
+window.addEventListener('beforeunload',()=>localStorage.blokkBest=Math.max(best,score));
+</script></body></html>
