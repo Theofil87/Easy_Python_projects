@@ -2,7 +2,7 @@
 
 A collection of my first Python projects and experiments.
 
-These projects were created while I was learning the fundamentals of Python programming, with a focus on programming logic, functions, user input, randomization, and simple graphical user interfaces.
+These projects were created while learning Python fundamentals and building a foundation in programming logic, functions, user input, randomization and basic GUI development.
 
 ## 📂 Projects
 
@@ -12,11 +12,11 @@ These projects were created while I was learning the fundamentals of Python prog
 
 A simple dice simulation using Python's `random` module.
 
-Concepts practiced:
+**Concepts**
 - Random number generation
 - Variables
-- Basic Python logic
 - Loops
+- Basic Python logic
 
 ### 🧮 GUI Calculator
 
@@ -24,9 +24,7 @@ Concepts practiced:
 
 A basic calculator with a graphical user interface built using **Tkinter**.
 
-Features include basic mathematical operations and exponentiation.
-
-Concepts practiced:
+**Concepts**
 - Tkinter
 - GUI development
 - Button events
@@ -39,11 +37,11 @@ Concepts practiced:
 
 A simple number guessing game where the player attempts to guess a randomly generated number with a limited number of attempts.
 
-Concepts practiced:
-- `random`
+**Concepts**
 - User input
 - Conditional statements
 - Loops
+- Randomization
 - Game logic
 
 ### ✂️ Rock Paper Scissors
@@ -52,13 +50,11 @@ Concepts practiced:
 
 A command-line implementation of the classic Rock Paper Scissors game.
 
-The computer generates its move using Python's `random` module.
-
-Concepts practiced:
+**Concepts**
 - Conditional logic
 - User input
-- Randomization
 - Functions
+- Randomization
 - Basic game mechanics
 
 ## 🛠️ Technologies
@@ -67,9 +63,9 @@ Concepts practiced:
 - Tkinter
 - Python `random` module
 
-## 🎯 Purpose
+## 🎯 Why This Repository Exists
 
-These projects represent my early steps in learning Python.
+These projects represent the beginning of my Python journey.
 
 They helped me build a foundation in:
 
@@ -82,15 +78,25 @@ They helped me build a foundation in:
 - Random number generation
 - Basic GUI development
 
-Since then, I have moved on to more advanced Python projects involving **data analysis, SQL, PostgreSQL, Streamlit, Power BI, and manufacturing analytics**.
+Since then, I have progressed to more advanced projects involving **data analysis, SQL, PostgreSQL, Streamlit, Power BI and manufacturing analytics**.
 
-## 📌 Repository Status
+For that reason, this repository is kept as a record of my progression from basic Python programming toward applied Data Analytics.
 
-These projects are kept as a record of my learning journey and my first experiments with Python.
+## 🔗 Next Step
 
-They may be simple compared with my newer projects, but they show where my Python journey started.
+For my current analytics work, see:
 
----
+- **Manufacturing Production & Quality Analytics**  
+  https://github.com/Theofil87/manufacturing-production-quality-analytics
 
-**Author:** Béla (Theo) Páger  
-**GitHub:** [@Theofil87](https://github.com/Theofil87)
+- **SPC Quality Monitoring**  
+  https://github.com/Theofil87/SPC-quality-monitoring
+
+- **Portfolio**  
+  https://theofil87.github.io/bela-pager-portfolio/
+
+## 👤 Author
+
+**Béla (Theo) Páger**
+
+GitHub: https://github.com/Theofil87
